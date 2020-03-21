@@ -12,6 +12,7 @@ gunicorn = "^20.0.4"
 jinja2 = "^2.11.1"
 peewee = "^3.13.1"
 psycopg2-binary = "^2.8.4"
+arrow = "^0.15.5"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
