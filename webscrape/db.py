@@ -39,13 +39,13 @@ class Submission(Base):
 
 
 class Worker(Base):
-    name = pw.CharField(default=randstr)
+    secret = pw.CharField()
 
 
 class Job(Base):
     url = pw.CharField()
     headers = pw.CharField()
-    complete = pw.BooleanField(default=False)
+    completed = pw.BooleanField(default=False)
 
 
 class Assignment(Base):
