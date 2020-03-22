@@ -13,6 +13,9 @@ jinja2 = "^2.11.1"
 peewee = "^3.13.1"
 psycopg2-binary = "^2.8.4"
 arrow = "^0.15.5"
+bs4 = "^0.0.1"
+lxml = "^4.5.0"
+requests = "^2.23.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
