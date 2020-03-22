@@ -60,6 +60,7 @@ class Worker(Base):
 
 class Pipeline(Base):
     "What to do before/after a network request is made"
+    name = pw.CharField(unique=True)
     py_before = pw.TextField()
     py_after = pw.TextField()
 
@@ -77,3 +78,14 @@ class Assignment(Base):
     worker = pw.ForeignKeyField(Worker)
     job = pw.ForeignKeyField(Job)
     assigned_at = pw.DateTimeField(default=arrow.utcnow)
+
+
+tables = {
+    "Question": Question,
+    "Language": Language,
+    "Submission": Submission,
+    "Worker": Worker,
+    "Job": Job,
+    "Assignment": Assignment,
+    "Pipeline": Pipeline,
+}

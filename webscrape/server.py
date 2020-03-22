@@ -2,6 +2,7 @@ import bottle
 import logging
 from functools import wraps
 from bottle_tools import fill_args
+from webscrape.db import tables
 
 
 log = logging.getLogger(__name__)
@@ -87,7 +88,7 @@ def post_a_completed_batch(worker_id: int, assignments: list, Assignment, db):
         # insert results into our database
         g = {}
         exec(job.pipeline.py_after, g)
-        g["after"](assignment["results"], db)
+        g["after"](db=db, pipeline_map=pipelines.MAP, **assignment["results"], **tables)
         # mark job as done
         job.completed = True
         job.save()
