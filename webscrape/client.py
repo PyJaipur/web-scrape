@@ -28,13 +28,14 @@ def register_worker(base, sleep_n=5):
         r = requests.get(f"{base}/batch", params=auth)
         if r.status_code != 200:
             return []
+        batch = r.json()
         jobs = []
-        for job in r.json()["jobs"]:
+        for job in batch["jobs"]:
 
             def process():
                 r = requests.get(job["url"], headers=job["headers"])
                 g = {}
-                exec(job["before"], g)
+                exec(batch["pipelines"][job["pipeline_id"]], g)
                 results = g["before"](r)
                 return Job(job["job_id"], job["assignment_id"], None, results)
 
@@ -50,9 +51,16 @@ def register_worker(base, sleep_n=5):
         return results
 
     def post_results(results):
-        # TODO: format according to api spec
-        # requests.post(f"{base}/batch", json=results)
-        pass
+        requests.post(
+            f"{base}/batch",
+            json={
+                "results": [
+                    {"assignment_id": job.assignment_id, "returned": job.results}
+                    for job in results
+                ],
+                **auth,
+            },
+        )
 
     def run():
         while True:

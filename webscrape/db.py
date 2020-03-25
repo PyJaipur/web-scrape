@@ -1,6 +1,6 @@
 import os
 import random
-import arrow
+from datetime import datetime
 import string
 import peewee as pw
 from playhouse.db_url import connect
@@ -69,7 +69,7 @@ class Assignment(Base):
     "A job is issued to some worker"
     worker = pw.ForeignKeyField(Worker, on_delete="CASCADE")
     job = pw.ForeignKeyField(Job, on_delete="CASCADE")
-    assigned_at = pw.DateTimeField(default=arrow.utcnow)
+    assigned_at = pw.DateTimeField(default=datetime.utcnow)
 
 
 tables = {

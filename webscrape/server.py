@@ -40,55 +40,64 @@ def create_new_worker_entry(secret: str, Worker):
 @app.get("/batch")
 @verify_worker
 @fill_args
-def get_a_job_batch_for_a_worker(worker_id: str, db, Assignment):
+def get_a_job_batch_for_a_worker(worker_id: str, db, Assignment, Pipeline):
     # - Find jobs which have not been assigned
     sql = """
     select
       job.id,
       job.url,
       job.headers,
-      p.py_before
+      job.pipeline_id
     from
       job
     left join assignment a on
       a.job_id = job.id
-    left join pipeline p on
-      job.pipeline_id = p.id
     group by
       job.id
     having
-      job.completed = 1
+      job.completed = false
     order by
       count(a.id) asc
     limit 10
     """
     job_list = [
         {
-            "job_id": job.id,
+            "job_id": id,
             "assignment_id": None,
-            "url": job.url,
-            "headers": job.headers,
-            "before": job.py_before,
+            "url": url,
+            "headers": headers,
+            "pipeline_id": pipe_id,
         }
-        for job in db.execute_sql(sql)
+        for id, url, headers, pipe_id in db.execute_sql(sql)
     ]
     # - create assignments for this worker
     for job in job_list:
         assignment = Assignment.create(job_id=job["job_id"], worker_id=worker_id)
         job["assignment_id"] = assignment.id
-    return {"jobs": job_list}
+    pipes = {j["pipeline_id"] for j in job_list}
+    return {
+        "jobs": job_list,
+        "pipelines": {
+            p.name: p.py_before
+            for p in Pipeline.select().where(Pipeline.name.in_(pipes))
+        },
+    }
 
 
 @app.post("/batch")
 @verify_worker
 @fill_args
-def post_a_completed_batch(worker_id: int, assignments: list, Assignment, db):
+def post_a_completed_batch(worker_id: int, results: list, Assignment, db):
     for assignment in assignments:
         job = Assignment.get_by_id(assignment["assignment_id"]).job
+        if job.completed:
+            continue
         # insert results into our database
         g = {}
         exec(job.pipeline.py_after, g)
-        g["after"](db=db, pipeline_map=pipelines.MAP, **assignment["results"], **tables)
+        g["after"](
+            db=db, pipeline_map=pipelines.MAP, **assignment["returned"], **tables
+        )
         # mark job as done
         job.completed = True
         job.save()
