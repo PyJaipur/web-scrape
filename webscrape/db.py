@@ -3,19 +3,11 @@ import random
 import arrow
 import string
 import peewee as pw
-from playhouse.sqlite_ext import SqliteExtDatabase
+from playhouse.db_url import connect
 
 env = os.environ.get
-
-# db = pw.PostgresqlDatabase("webscrape", user="pyjaipur", password="password!")
-db = SqliteExtDatabase(
-    "pyjaipur.sqlitedb",
-    pragmas=(
-        ("cache_size", -1024 * 64),  # 64MB page-cache.
-        ("journal_mode", "wal"),  # Use WAL-mode (you should always use this!).
-        ("foreign_keys", 1),
-    ),
-)
+pwd = env("PGSQL_PASSWORD", "secret")
+db = connect(f"postgresext+pool://admin:{pwd}@localhost:54322/postgres")
 
 
 def randstr(k=5):
@@ -43,8 +35,8 @@ class Language(Base):
 
 class Submission(Base):
     "A submission by someone"
-    question = pw.ForeignKeyField(Question)
-    lang = pw.ForeignKeyField(Language)
+    question = pw.ForeignKeyField(Question, on_delete="CASCADE")
+    lang = pw.ForeignKeyField(Language, on_delete="CASCADE")
     result = pw.CharField()
     code = pw.TextField()
     md5 = pw.CharField()
@@ -60,7 +52,7 @@ class Worker(Base):
 
 class Pipeline(Base):
     "What to do before/after a network request is made"
-    name = pw.CharField(unique=True)
+    name = pw.CharField(primary_key=True)
     py_before = pw.TextField()
     py_after = pw.TextField()
 
@@ -70,13 +62,13 @@ class Job(Base):
     url = pw.CharField()
     headers = pw.CharField()
     completed = pw.BooleanField(default=False)
-    pipeline = pw.ForeignKeyField(Pipeline)
+    pipeline = pw.ForeignKeyField(Pipeline, on_delete="CASCADE")
 
 
 class Assignment(Base):
     "A job is issued to some worker"
-    worker = pw.ForeignKeyField(Worker)
-    job = pw.ForeignKeyField(Job)
+    worker = pw.ForeignKeyField(Worker, on_delete="CASCADE")
+    job = pw.ForeignKeyField(Job, on_delete="CASCADE")
     assigned_at = pw.DateTimeField(default=arrow.utcnow)
 
 

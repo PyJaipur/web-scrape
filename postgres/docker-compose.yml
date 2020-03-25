@@ -1,0 +1,16 @@
+version: "3.7"
+volumes:
+    pyjaipur-data:
+services:
+    pyjaipur_db:
+        image: 'postgres:latest'
+        restart: always
+        environment:
+            POSTGRES_DB: postgres
+            POSTGRES_USER: admin
+            POSTGRES_PASSWORD: secret
+            PGDATA: /var/lib/postgresql/data
+        volumes:
+            - pyjaipur-data:/var/lib/postgresql/data
+        ports:
+            - "54322:5432"
