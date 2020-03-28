@@ -1,5 +1,5 @@
 def before(response):
-    return {}
+    return {"statement": ..., "code": ...}
 
 
 def after(db, *args, **kwargs):
