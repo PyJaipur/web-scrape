@@ -5,7 +5,9 @@ def before(response):
     table = soup.find("table", {"class": "dataTable"})
     codes = []
     for row in table.findAll("tr"):
-        codes.append(row.findAll("td")[1].text)
+        tds = list(row.findAll("td"))
+        if len(tds) > 1:
+            codes.append(tds[1].text)
     return {"codes": codes}
 
 

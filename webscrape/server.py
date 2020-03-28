@@ -1,4 +1,5 @@
 import bottle
+import json
 import logging
 from functools import wraps
 from bottle_tools import fill_args
@@ -65,7 +66,7 @@ def get_a_job_batch_for_a_worker(worker_id: str, db, Assignment, Pipeline):
             "job_id": id,
             "assignment_id": None,
             "url": url,
-            "headers": headers,
+            "headers": json.loads(headers) if headers else {},
             "pipeline_id": pipe_id,
         }
         for id, url, headers, pipe_id in db.execute_sql(sql)

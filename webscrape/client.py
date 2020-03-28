@@ -31,15 +31,18 @@ def register_worker(base, sleep_n=5):
         batch = r.json()
         jobs = []
         for job in batch["jobs"]:
+            work_order = job
 
             def process():
-                r = requests.get(job["url"], headers=job["headers"])
+                r = requests.get(work_order["url"], headers=work_order["headers"])
                 g = {}
-                exec(batch["pipelines"][job["pipeline_id"]], g)
+                exec(batch["pipelines"][work_order["pipeline_id"]], g)
                 results = g["before"](r)
-                return Job(job["job_id"], job["assignment_id"], None, results)
+                return Job(
+                    work_order["job_id"], work_order["assignment_id"], None, results
+                )
 
-            job = Job(job["job_id"], job["assignment_id"], run, None)
+            job = Job(job["job_id"], job["assignment_id"], process, None)
             jobs.append(job)
         return jobs
 
