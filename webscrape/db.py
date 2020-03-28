@@ -7,7 +7,8 @@ from playhouse.db_url import connect
 
 env = os.environ.get
 pwd = env("PGSQL_PASSWORD", "secret")
-db = connect(f"postgresext+pool://admin:{pwd}@localhost:54322/postgres")
+# db = connect(f"postgresext+pool://admin:{pwd}@localhost:54322/postgres")
+db = SqliteDatabase("temp.sqlite", pragmas={"journal_mode": "wal"})
 
 
 def randstr(k=5):
